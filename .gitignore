@@ -1,0 +1,22 @@
+# Gradle
+.gradle
+build/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+/local.properties
+
+# Mac
+*.DS_Store
+._*
+
+# Windows
+Thumbs.db
+
+# Assets
+*.png
+*.mp3
