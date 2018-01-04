@@ -26,6 +26,8 @@ import com.andreihh.algoventure.core.systems.DamageSystem.Health
 import com.andreihh.algoventure.core.systems.DoorSystem.Door
 import com.andreihh.algoventure.core.systems.FacingSystem.Facing
 import com.andreihh.algoventure.core.systems.Player
+import com.andreihh.algoventure.core.systems.VisionSystem.Opaque
+import com.andreihh.algoventure.core.systems.VisionSystem.SightRange
 
 object EntityTemplates {
     fun knight(x: Int, y: Int) = entityTemplate {
@@ -35,12 +37,36 @@ object EntityTemplates {
             elapsedMillis = 0,
             loop = true
         )
-        +Sprite(width = 24, height = 24, z = 1, priority = 1, gid = 1)
+        +Sprite(
+            width = 24, height = 24,
+            z = 1, priority = 1, gid = 1,
+            offsetY = -4
+        )
         +Facing.LEFT
         +Body.KINEMATIC
         +Position(x, y)
-        +Actor(stamina = 1, damage = 25)
+        +Actor(stamina = 0, damage = 25)
         +Player
+        +SightRange(range = 8)
+    }
+
+    fun zombie(x: Int, y: Int, headless: Boolean = false) = entityTemplate {
+        +Animation(
+            aid = if (headless) "zombie-headless" else "zombie",
+            name = "idle",
+            elapsedMillis = 0,
+            loop = true
+        )
+        +Sprite(
+            width = 24, height = 24,
+            z = 1, priority = 1, gid = if (headless) 16 else 14,
+            offsetY = -4
+        )
+        +Facing.LEFT
+        +Body.KINEMATIC
+        +Position(x, y)
+        +Actor(stamina = 0, damage = 15)
+        +Health(maxHealth = 50, health = 50)
     }
 
     fun skeleton(x: Int, y: Int) = entityTemplate {
@@ -50,12 +76,15 @@ object EntityTemplates {
             elapsedMillis = 0,
             loop = true
         )
-        +Sprite(width = 24, height = 24, z = 1, priority = 1, gid = 19)
+        +Sprite(
+            width = 24, height = 24,
+            z = 1, priority = 1, gid = 19,
+            offsetY = -4)
         +Facing.LEFT
         +Body.KINEMATIC
         +Position(x, y)
-        +Actor(stamina = 1, damage = 15)
-        +Health(maxHealth = 75, health = 75)
+        +Actor(stamina = 0, damage = 15)
+        +Health(maxHealth = 50, health = 50)
     }
 
     fun skeletonWarrior(x: Int, y: Int) = entityTemplate {
@@ -65,12 +94,54 @@ object EntityTemplates {
             elapsedMillis = 0,
             loop = true
         )
-        +Sprite(width = 24, height = 24, z = 1, priority = 1, gid = 21)
+        +Sprite(
+            width = 24, height = 24,
+            z = 1, priority = 1, gid = 21,
+            offsetY = -4
+        )
         +Facing.LEFT
         +Body.KINEMATIC
         +Position(x, y)
-        +Actor(stamina = 1, damage = 25)
+        +Actor(stamina = 0, damage = 20)
+        +Health(maxHealth = 75, health = 75)
+    }
+
+    fun vampire(x: Int, y: Int) = entityTemplate {
+        +Animation(
+            aid = "vampire",
+            name = "idle",
+            elapsedMillis = 0,
+            loop = true
+        )
+        +Sprite(
+            width = 24, height = 24,
+            z = 1, priority = 1, gid = 30,
+            offsetY = -4
+        )
+        +Facing.LEFT
+        +Body.KINEMATIC
+        +Position(x, y)
+        +Actor(stamina = 0, damage = 25)
         +Health(maxHealth = 100, health = 100)
+    }
+
+    fun boneGolem(x: Int, y: Int) = entityTemplate {
+        +Animation(
+            aid = "bone-golem",
+            name = "idle",
+            elapsedMillis = 0,
+            loop = true
+        )
+        +Sprite(
+            width = 24, height = 24,
+            z = 1, priority = 1, gid = 38,
+            offsetY = -4
+        )
+        +Facing.LEFT
+        +Body.KINEMATIC
+        +Position(x, y)
+        +Actor(stamina = 0, damage = 35)
+        +Health(maxHealth = 200, health = 200)
     }
 
     fun floor(x: Int, y: Int, broken: Boolean = false) = entityTemplate {
@@ -101,6 +172,7 @@ object EntityTemplates {
                 else -> throw AssertionError("Invalid mask '$adjacencyMask'!")
             }
             +Sprite(width = 24, height = 24, z = 1, priority = 1, gid = gid)
+            +Opaque
             +Body.STATIC
             +Position(x, y)
         }
@@ -120,6 +192,9 @@ object EntityTemplates {
         val openGid = 88
         val closedGid = 87
         val gid = if (isOpen) openGid else closedGid
+        if (!isOpen) {
+            +Opaque
+        }
         +Door(openGid, closedGid, isOpen)
         +Sprite(width = 24, height = 24, z = 1, priority = 2, gid = gid)
         +Position(x, y)

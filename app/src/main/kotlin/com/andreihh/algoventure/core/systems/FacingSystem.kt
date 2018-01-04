@@ -47,13 +47,9 @@ class FacingSystem : EventSystem() {
             else -> facing
         }
         entity.facing = newFacing
-        val sprite = entity.sprite ?: return
+        val sprite = entity.sprite
         if (newFacing != facing) {
-            val newGid = sprite.gid.flipHorizontally()
             val newSprite = sprite.copy(gid = sprite.gid.flipHorizontally())
-            println("Old gid: ${sprite.gid}; New gid: $newGid; New gid without flags: ${newGid.clearFlags()}")
-            println("Old sprite: $sprite")
-            println("New sprite: $newSprite")
             entity.set(newSprite)
         }
     }

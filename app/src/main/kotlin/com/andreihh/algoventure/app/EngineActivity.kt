@@ -26,6 +26,7 @@ import com.andreihh.algoventure.core.systems.InputInterpretingSystem.InputAction
 
 class EngineActivity : ClientActivity() {
     companion object {
+        @JvmStatic
         fun start(context: Context, args: Bundle) {
             //ClientActivity.start<EngineActivity>(context, args)
             val intent = Intent(context, EngineActivity::class.java)

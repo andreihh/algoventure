@@ -171,7 +171,7 @@ fun DungeonLevel.placeDoors() {
 
 private fun DungeonLevel.isDeadEnd(x: Int, y: Int): Boolean =
     (get(x, y) == Tile.FLOOR || get(x, y) == Tile.DOOR)
-        && countAdjacent(x, y, Tile.FLOOR, Tile.DOOR) < 1
+        && countAdjacent(x, y, Tile.FLOOR, Tile.DOOR) <= 1
 
 fun DungeonLevel.removeDeadEnds() {
     val queue = LinkedList<Point>()
@@ -216,5 +216,20 @@ fun DungeonLevel.placeWalls() {
                 set(x, y, Tile.WALL)
             }
         }
+    }
+}
+
+fun DungeonLevel.placeSpawningPoints(count: Int) {
+    val points = arrayListOf<Point>()
+    for (x in 0 until width) {
+        for (y in 0 until height) {
+            if (get(x, y) == Tile.FLOOR) {
+                points += Point(x, y)
+            }
+        }
+    }
+    points.shuffle()
+    for ((x, y) in points.take(count)) {
+        set(x, y, Tile.SPAWNING_POINT)
     }
 }

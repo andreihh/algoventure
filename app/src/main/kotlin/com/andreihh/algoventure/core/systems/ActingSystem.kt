@@ -40,6 +40,8 @@ class ActingSystem : EventSystem() {
 
     object NewAct : Event
 
+    object NewTurn : Event
+
     private val entities: EntityGroup by context(ENTITY_POOL)
     private val actors get() = entities.filter { Actor::class in it }
 
@@ -55,10 +57,19 @@ class ActingSystem : EventSystem() {
             for (entity in actors) {
                 entity.actor = entity.actor.copy(stamina = 1)
             }
-            post(NewAct)
+            post(NewTurn)
         } else {
-            request(ActionRequest(nextActor.id))?.let(::post)
+            val action = request(ActionRequest(nextActor.id))
+            if (action != null) {
+                check(action.entityId == nextActor.id)
+                post(action)
+            }
         }
+    }
+
+    @Subscribe
+    fun onNewTurn(event: NewTurn) {
+        post(NewAct)
     }
 
     @Subscribe

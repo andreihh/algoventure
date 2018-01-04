@@ -18,8 +18,6 @@ package com.andreihh.algoventure.core.systems
 
 import com.andreihh.algostorm.core.drivers.input.Input
 import com.andreihh.algostorm.core.ecs.EntityGroup
-import com.andreihh.algostorm.core.ecs.EntityRef
-import com.andreihh.algostorm.core.ecs.EntityRef.Id
 import com.andreihh.algostorm.core.event.Subscribe
 import com.andreihh.algostorm.systems.input.InputSystem
 import com.andreihh.algostorm.systems.physics2d.geometry2d.Direction
@@ -38,7 +36,6 @@ class InputInterpretingSystem : InputSystem() {
     }
 
     private val entities by context<EntityGroup>(ENTITY_POOL)
-    private val playerId get() = entities.single(EntityRef::isPlayer).id
     private var nextPlayerInput: Input? = null
 
     override fun onScroll(dx: Int, dy: Int): Input? = null
@@ -49,6 +46,7 @@ class InputInterpretingSystem : InputSystem() {
 
     @Subscribe
     fun onActionRequest(request: ActionRequest) {
+        val playerId = entities.getPlayer().id
         if (request.entityId == playerId) {
             val action = when (nextPlayerInput) {
                 WAIT -> Wait(playerId)
@@ -63,6 +61,3 @@ class InputInterpretingSystem : InputSystem() {
         }
     }
 }
-
-private val EntityRef.isPlayer: Boolean
-    get() = contains(Player::class)

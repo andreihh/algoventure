@@ -38,14 +38,6 @@ class MovementSystem : EventSystem() {
 
     data class Wait(override val entityId: Id) : Action
 
-    private fun getDirection(dx: Int, dy: Int): Direction = when {
-        dy < 0 -> Direction.N
-        dx > 0 -> Direction.E
-        dy > 0 -> Direction.S
-        dx < 0 -> Direction.W
-        else -> throw AssertionError()
-    }
-
     @Subscribe
     fun onMove(event: Move) {
         val (entityId, direction) = event
@@ -59,7 +51,7 @@ class MovementSystem : EventSystem() {
 
     @Subscribe
     fun onTransformed(event: Transformed) {
-        val direction = getDirection(event.dx, event.dy)
+        val direction = Direction.from(event.dx, event.dy) ?: error("")
         post(ActionCompleted(Move(event.entityId, direction)))
     }
 }

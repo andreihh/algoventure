@@ -17,5 +17,9 @@
 package com.andreihh.algoventure.core.systems
 
 import com.andreihh.algostorm.core.ecs.Component
+import com.andreihh.algostorm.core.ecs.EntityGroup
+import com.andreihh.algostorm.core.ecs.EntityRef
 
 object Player : Component
+
+fun EntityGroup.getPlayer(): EntityRef = single { Player::class in it }

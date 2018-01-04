@@ -31,6 +31,6 @@ class DungeonLevel(width: Int, height: Int) :
     }
 
     enum class Tile {
-        EMPTY, FLOOR, WALL, DOOR, ENTRANCE, EXIT
+        EMPTY, FLOOR, WALL, DOOR, SPAWNING_POINT, ENTRANCE, EXIT
     }
 }

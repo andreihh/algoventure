@@ -27,6 +27,7 @@ import com.andreihh.algostorm.systems.physics2d.transformed
 import com.andreihh.algoventure.core.systems.ActingSystem.ActionCompleted
 import com.andreihh.algoventure.core.systems.DoorSystem.Door
 import com.andreihh.algoventure.core.systems.MovementSystem.Move
+import com.andreihh.algoventure.core.systems.VisionSystem.Opaque
 
 class DoorSystem : EventSystem() {
     data class Door(
@@ -65,10 +66,12 @@ private var EntityRef.door: Door
 
 private fun EntityRef.openDoor() {
     door = door.copy(isOpen = true)
-    sprite?.copy(gid = door.openGid)?.let(::set)
+    set(sprite.copy(gid = door.openGid))
+    remove(Opaque::class)
 }
 
 private fun EntityRef.closeDoor() {
     door = door.copy(isOpen = false)
-    sprite?.copy(gid = door.closedGid)?.let(::set)
+    set(sprite.copy(gid = door.closedGid))
+    set(Opaque)
 }

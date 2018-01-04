@@ -20,14 +20,18 @@ import com.andreihh.algostorm.core.drivers.graphics2d.Color
 import com.andreihh.algostorm.core.ecs.EntityRef.Id
 import com.andreihh.algostorm.systems.MapObject
 import com.andreihh.algostorm.systems.MapObject.Builder.Companion.mapObject
+import com.andreihh.algoventure.core.assets.EntityTemplates.boneGolem
 import com.andreihh.algoventure.core.assets.EntityTemplates.door
 import com.andreihh.algoventure.core.assets.EntityTemplates.floor
 import com.andreihh.algoventure.core.assets.EntityTemplates.knight
+import com.andreihh.algoventure.core.assets.EntityTemplates.skeleton
 import com.andreihh.algoventure.core.assets.EntityTemplates.skeletonWarrior
+import com.andreihh.algoventure.core.assets.EntityTemplates.vampire
 import com.andreihh.algoventure.core.assets.EntityTemplates.wall
 import com.andreihh.algoventure.core.assets.EntityTemplates.wallTorch
-import com.andreihh.algoventure.core.assets.TileSets.creatures
-import com.andreihh.algoventure.core.assets.TileSets.world
+import com.andreihh.algoventure.core.assets.EntityTemplates.zombie
+import com.andreihh.algoventure.core.assets.Sounds
+import com.andreihh.algoventure.core.assets.TileSets
 import com.andreihh.algoventure.core.generation.MapGenerator
 import com.andreihh.algoventure.core.generation.Random.nextBoolean
 import com.andreihh.algoventure.core.generation.Random.nextInt
@@ -39,7 +43,8 @@ class DungeonGenerator(
     private val minRoomSize: Int,
     private val maxRoomSize: Int,
     private val roomPlacementAttempts: Int,
-    private val corridorStraightness: Double
+    private val corridorStraightness: Double,
+    private val spawningPoints: Int
 ) : MapGenerator {
 
     private fun generateLevel() = DungeonLevel(mapWidth, mapHeight).apply {
@@ -48,7 +53,18 @@ class DungeonGenerator(
         placeDoors()
         removeDeadEnds()
         placeWalls()
+        placeSpawningPoints(spawningPoints)
     }
+
+    private fun randomMonster(x: Int, y: Int) =
+        when (nextInt(lower = 0, upperExclusive = 100)) {
+            in 0..10 -> zombie(x = x, y = y, headless = false)
+            in 11..20 -> zombie(x = x, y = y, headless = true)
+            in 21..40 -> skeletonWarrior(x, y)
+            in 41..60 -> vampire(x, y)
+            in 61..80 -> boneGolem(x, y)
+            else -> skeleton(x, y)
+        }
 
     override fun generateMap(): MapObject = mapObject {
         width = mapWidth
@@ -56,8 +72,9 @@ class DungeonGenerator(
         tileWidth = 24
         tileHeight = 24
         backgroundColor = Color("#FF000000")
-        tileSet(creatures)
-        tileSet(world)
+        tileSet(TileSets.creatures)
+        tileSet(TileSets.world)
+        sound(Sounds.gameSoundtrack)
 
         val level = generateLevel()
         for (x in 0 until mapWidth) {
@@ -75,6 +92,10 @@ class DungeonGenerator(
                     Tile.DOOR -> {
                         entity(floor(x, y))
                         entity(door(x, y))
+                    }
+                    Tile.SPAWNING_POINT -> {
+                        entity(floor(x, y, nextBoolean(0.2)))
+                        entity(randomMonster(x, y))
                     }
                     Tile.ENTRANCE -> {}
                     Tile.EXIT -> {}
@@ -105,7 +126,8 @@ class DungeonGenerator(
             minRoomSize = 4,
             maxRoomSize = 8,
             roomPlacementAttempts = 32 * 32 / 8,
-            corridorStraightness = 0.8
+            corridorStraightness = 0.8,
+            spawningPoints = 10
         ).generateMap()
     }
 }

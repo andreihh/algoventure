@@ -22,6 +22,7 @@ import android.media.MediaPlayer
 import android.os.Bundle
 import android.view.View
 import com.andreihh.algoventure.R
+import com.andreihh.algoventure.core.EngineHandler
 import kotlinx.android.synthetic.main.activity_main.endTorch
 import kotlinx.android.synthetic.main.activity_main.startTorch
 
@@ -84,7 +85,10 @@ class MainActivity : Activity() {
 
     fun onPlay(v: View) {
         playUiInteractionSound()
-        EngineActivity.start(context = this, args = Bundle.EMPTY)
+        val args = Bundle().apply {
+            putBoolean(EngineHandler.NEW_GAME, true)
+        }
+        EngineActivity.start(context = this, args = args)
     }
 
     fun onRankings(v: View) {

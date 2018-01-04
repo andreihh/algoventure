@@ -44,6 +44,14 @@ object TileSets {
             frame(tileId = 6, duration = 500)
             frame(tileId = 7, duration = 500)
         }
+        animation(name = "zombie:idle") {
+            frame(tileId = 14, duration = 500)
+            frame(tileId = 15, duration = 500)
+        }
+        animation(name = "zombie-headless:idle") {
+            frame(tileId = 16, duration = 500)
+            frame(tileId = 17, duration = 500)
+        }
         animation(name = "skeleton:idle") {
             frame(tileId = 18, duration = 500)
             frame(tileId = 19, duration = 500)
@@ -51,6 +59,14 @@ object TileSets {
         animation(name = "skeleton-warrior:idle") {
             frame(tileId = 20, duration = 500)
             frame(tileId = 21, duration = 500)
+        }
+        animation(name = "vampire:idle") {
+            frame(tileId = 30, duration = 500)
+            frame(tileId = 31, duration = 500)
+        }
+        animation(name = "bone-golem:idle") {
+            frame(tileId = 38, duration = 500)
+            frame(tileId = 39, duration = 500)
         }
     }
 

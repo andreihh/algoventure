@@ -16,6 +16,8 @@
 
 package com.andreihh.algoventure.core
 
+import com.andreihh.algostorm.core.drivers.io.File
+import com.andreihh.algostorm.core.drivers.serialization.JsonDriver
 import com.andreihh.algostorm.core.ecs.EntityRef
 import com.andreihh.algostorm.core.ecs.EntityRef.Id
 import com.andreihh.algostorm.core.ecs.System
@@ -23,20 +25,19 @@ import com.andreihh.algostorm.core.ecs.System.Companion.ENTITY_POOL
 import com.andreihh.algostorm.core.engine.Handler
 import com.andreihh.algostorm.core.event.EventBus
 import com.andreihh.algostorm.systems.EventSystem.Companion.EVENT_BUS
+import com.andreihh.algostorm.systems.MapObject
 import com.andreihh.algostorm.systems.Update
 import com.andreihh.algostorm.systems.audio.MusicSystem
-import com.andreihh.algostorm.systems.audio.MusicSystem.Companion.MUSIC_PLAYER
 import com.andreihh.algostorm.systems.audio.MusicSystem.PlayMusic
-import com.andreihh.algostorm.systems.audio.MusicSystem.StopMusic
 import com.andreihh.algostorm.systems.audio.SoundSystem
-import com.andreihh.algostorm.systems.audio.SoundSystem.Companion.SOUND_PLAYER
+import com.andreihh.algostorm.systems.audio.AudioSystem.Companion.AUDIO_DRIVER
 import com.andreihh.algostorm.systems.graphics2d.AnimationSystem
 import com.andreihh.algostorm.systems.graphics2d.Camera
 import com.andreihh.algostorm.systems.graphics2d.CameraSystem
 import com.andreihh.algostorm.systems.graphics2d.CameraSystem.Follow
 import com.andreihh.algostorm.systems.graphics2d.CameraSystem.UpdateCamera
 import com.andreihh.algostorm.systems.graphics2d.GraphicsSystem.Companion.CAMERA
-import com.andreihh.algostorm.systems.graphics2d.GraphicsSystem.Companion.CANVAS
+import com.andreihh.algostorm.systems.graphics2d.GraphicsSystem.Companion.GRAPHICS_DRIVER
 import com.andreihh.algostorm.systems.graphics2d.GraphicsSystem.Companion.TILE_HEIGHT
 import com.andreihh.algostorm.systems.graphics2d.GraphicsSystem.Companion.TILE_SET_COLLECTION
 import com.andreihh.algostorm.systems.graphics2d.GraphicsSystem.Companion.TILE_WIDTH
@@ -59,11 +60,18 @@ import com.andreihh.algoventure.core.systems.DoorSystem
 import com.andreihh.algoventure.core.systems.FacingSystem
 import com.andreihh.algoventure.core.systems.InputInterpretingSystem
 import com.andreihh.algoventure.core.systems.MovementSystem
+import com.andreihh.algoventure.core.systems.VisionSystem
+import com.andreihh.algoventure.core.systems.VisionSystem.UpdateFieldOfVision
 
 class EngineHandler : Handler() {
+    companion object {
+        const val NEW_GAME: String = "NEW_GAME"
+    }
+
     private val eventBus = EventBus()
     private val camera = Camera()
-    private val mapObject = DungeonGenerator.newMap()
+    private lateinit var mapObject: MapObject
+    private val autosaveFile = File("user:///autosave.json")
 
     private val systems = listOf(
         RenderingSystem(),
@@ -82,43 +90,54 @@ class EngineHandler : Handler() {
         FacingSystem(),
         DoorSystem(),
         DamageSystem(),
-        AttackSystem()
+        AttackSystem(),
+        VisionSystem()
     )
 
     private lateinit var knight: EntityRef
 
     override val millisPerUpdate: Int get() = 25
 
+    private fun newGame(): MapObject = DungeonGenerator.newMap()
+
+    private fun loadAutosave(): MapObject =
+        fileSystemDriver
+            .openFileInput(autosaveFile)
+            .use(JsonDriver::deserialize)
+
     override fun onInit(args: Map<String, Any?>) {
+        mapObject = if (args[NEW_GAME] == true) newGame() else loadAutosave()
         for (tileSet in mapObject.tileSets) {
             graphicsDriver.loadBitmap(tileSet.image.source)
         }
-        audioDriver.loadMusic(Sounds.gameSoundtrack)
-        knight = mapObject.entityPool[Id(1)] ?: error("")
+        for (sound in mapObject.sounds) {
+            audioDriver.loadAudioStream(sound)
+        }
+        knight = mapObject.entities[Id(1)] ?: error("")
         val context = mapOf(
-            ENTITY_POOL to mapObject.entityPool,
+            ENTITY_POOL to mapObject.entities,
             EVENT_BUS to eventBus,
             TILE_WIDTH to 24,
             TILE_HEIGHT to 24,
             BACKGROUND to mapObject.backgroundColor,
             TILE_SET_COLLECTION to TileSetCollection(mapObject.tileSets),
             CAMERA to camera,
-            CANVAS to graphicsDriver,
+            GRAPHICS_DRIVER to graphicsDriver,
             INPUT_DRIVER to inputDriver,
-            MUSIC_PLAYER to audioDriver,
-            SOUND_PLAYER to audioDriver
+            AUDIO_DRIVER to audioDriver
         )
         systems.forEach { it.initialize(context) }
         eventBus.post(Follow(Id(1)))
+        eventBus.post(PlayMusic(music = Sounds.gameSoundtrack, loop = true))
     }
 
     override fun onStart() {
         systems.forEach(System::start)
-        eventBus.request(PlayMusic(music = Sounds.gameSoundtrack, loop = true))
     }
 
     private fun render() {
         eventBus.post(UpdateCamera)
+        eventBus.post(UpdateFieldOfVision)
         eventBus.publishPosts()
         if (graphicsDriver.isCanvasReady) {
             graphicsDriver.lockCanvas()
@@ -145,18 +164,17 @@ class EngineHandler : Handler() {
     }
 
     override fun onStop() {
-        eventBus.request(StopMusic())
         systems.forEach(System::stop)
     }
 
     override fun onRelease() {
-        mapObject.entityPool.clear()
+        fileSystemDriver.openFileOutput(autosaveFile).use { out ->
+            JsonDriver.serialize(out, mapObject)
+        }
+        mapObject.entities.clear()
     }
 
     override fun onError(cause: Exception) {
         cause.printStackTrace()
-        for (entity in mapObject.entityPool) {
-            println("(${entity.id}, ${entity.components})")
-        }
     }
 }
