@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion = 25
@@ -55,6 +56,8 @@ android {
 }
 
 dependencies {
+    //kapt "com.github.andreihh.algostorm:algostorm-processor:$algostorm_version"
+
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     compile "com.github.andreihh.algostorm:algostorm-android:$algostorm_version"
     compile "com.github.andreihh.algostorm:algostorm-systems:$algostorm_version"

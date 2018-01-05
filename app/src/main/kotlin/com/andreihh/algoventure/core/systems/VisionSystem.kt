@@ -42,11 +42,11 @@ class VisionSystem : EventSystem() {
 
     @Subscribe
     fun onUpdateFieldOfVision(event: UpdateFieldOfVision) {
+        val player = entities.getPlayer() ?: return
         val opaque = entities
             .filter(EntityRef::isOpaque)
             .mapNotNull(EntityRef::position)
             .mapTo(hashSetOf(), Position::toPoint)
-        val player = entities.getPlayer()
         val playerPosition = player.position?.toPoint() ?: error("")
         val fieldOfVision =
             Circle(playerPosition.x, playerPosition.y, player.sightRange)

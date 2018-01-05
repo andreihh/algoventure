@@ -37,7 +37,6 @@ class DoorSystem : EventSystem() {
     ) : Component
 
     private val entities by context<EntityGroup>(ENTITY_POOL)
-    private val doors get() = entities.filter(EntityRef::isDoor)
 
     @Subscribe
     fun onActionCompleted(event: ActionCompleted) {
@@ -46,6 +45,7 @@ class DoorSystem : EventSystem() {
         val position = entity.position ?: return
         val previousPosition =
             position.transformed(-action.direction.dx, -action.direction.dy)
+        val doors = entities.filter(EntityRef::isDoor)
         for (doorEntity in doors) {
             when (doorEntity.position) {
                 previousPosition -> doorEntity.closeDoor()
@@ -55,8 +55,7 @@ class DoorSystem : EventSystem() {
     }
 }
 
-private val EntityRef.isDoor: Boolean
-    get() = contains(Door::class)
+private val EntityRef.isDoor: Boolean get() = contains(Door::class)
 
 private var EntityRef.door: Door
     get() = checkNotNull(get(Door::class))

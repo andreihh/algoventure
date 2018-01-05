@@ -43,7 +43,6 @@ class ActingSystem : EventSystem() {
     object NewTurn : Event
 
     private val entities: EntityGroup by context(ENTITY_POOL)
-    private val actors get() = entities.filter { Actor::class in it }
 
     @Subscribe
     fun onUpdate(event: Update) {
@@ -52,6 +51,7 @@ class ActingSystem : EventSystem() {
 
     @Subscribe
     fun onNewAct(event: NewAct) {
+        val actors = entities.filter(EntityRef::isActor)
         val nextActor = actors.maxBy { it.actor.stamina } ?: return
         if (nextActor.actor.stamina <= 0) {
             for (entity in actors) {
@@ -74,7 +74,7 @@ class ActingSystem : EventSystem() {
 
     @Subscribe
     fun onActionCompleted(event: ActionCompleted) {
-        val entity = actors[event.action.entityId] ?: return
+        val entity = entities[event.action.entityId] ?: return
         entity.actor = entity.actor.copy(stamina = entity.actor.stamina - 1)
         post(NewAct)
     }

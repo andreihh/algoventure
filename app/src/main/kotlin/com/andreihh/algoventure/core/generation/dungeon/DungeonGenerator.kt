@@ -75,6 +75,8 @@ class DungeonGenerator(
         tileSet(TileSets.creatures)
         tileSet(TileSets.world)
         sound(Sounds.gameSoundtrack)
+        sound(Sounds.gameLost)
+        sound(Sounds.gameWon)
 
         val level = generateLevel()
         for (x in 0 until mapWidth) {
@@ -110,13 +112,6 @@ class DungeonGenerator(
             y = nextInt(lower = 0, upperExclusive = mapHeight - 1)
         } while (level[x, y] != Tile.FLOOR)
         entity(Id(1), knight(x, y))
-        var sx: Int
-        var sy: Int
-        do {
-            sx = nextInt(lower = 0, upperExclusive = mapWidth - 1)
-            sy = nextInt(lower = 0, upperExclusive = mapHeight - 1)
-        } while (level[sx, sy] != Tile.FLOOR || (x == sx && y == sy))
-        entity(skeletonWarrior(sx, sy))
     }
 
     companion object {
@@ -127,7 +122,7 @@ class DungeonGenerator(
             maxRoomSize = 8,
             roomPlacementAttempts = 32 * 32 / 8,
             corridorStraightness = 0.8,
-            spawningPoints = 10
+            spawningPoints = 5
         ).generateMap()
     }
 }

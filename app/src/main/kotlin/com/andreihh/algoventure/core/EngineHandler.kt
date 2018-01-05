@@ -58,10 +58,13 @@ import com.andreihh.algoventure.core.systems.AttackSystem
 import com.andreihh.algoventure.core.systems.DamageSystem
 import com.andreihh.algoventure.core.systems.DoorSystem
 import com.andreihh.algoventure.core.systems.FacingSystem
+import com.andreihh.algoventure.core.systems.GameTerminationSystem
+import com.andreihh.algoventure.core.systems.GameTerminationSystem.Companion.UI_DRIVER
 import com.andreihh.algoventure.core.systems.InputInterpretingSystem
 import com.andreihh.algoventure.core.systems.MovementSystem
 import com.andreihh.algoventure.core.systems.VisionSystem
 import com.andreihh.algoventure.core.systems.VisionSystem.UpdateFieldOfVision
+import com.andreihh.algoventure.core.systems.isGameTerminated
 
 class EngineHandler : Handler() {
     companion object {
@@ -91,7 +94,8 @@ class EngineHandler : Handler() {
         DoorSystem(),
         DamageSystem(),
         AttackSystem(),
-        VisionSystem()
+        VisionSystem(),
+        GameTerminationSystem()
     )
 
     private lateinit var knight: EntityRef
@@ -100,13 +104,11 @@ class EngineHandler : Handler() {
 
     private fun newGame(): MapObject = DungeonGenerator.newMap()
 
-    private fun loadAutosave(): MapObject =
-        fileSystemDriver
-            .openFileInput(autosaveFile)
-            .use(JsonDriver::deserialize)
+    private fun loadAutosave(): MapObject? =
+        fileSystemDriver.openInput(autosaveFile)?.use(JsonDriver::deserialize)
 
     override fun onInit(args: Map<String, Any?>) {
-        mapObject = if (args[NEW_GAME] == true) newGame() else loadAutosave()
+        mapObject = loadAutosave() ?: newGame()
         for (tileSet in mapObject.tileSets) {
             graphicsDriver.loadBitmap(tileSet.image.source)
         }
@@ -124,7 +126,8 @@ class EngineHandler : Handler() {
             CAMERA to camera,
             GRAPHICS_DRIVER to graphicsDriver,
             INPUT_DRIVER to inputDriver,
-            AUDIO_DRIVER to audioDriver
+            AUDIO_DRIVER to audioDriver,
+            UI_DRIVER to uiDriver
         )
         systems.forEach { it.initialize(context) }
         eventBus.post(Follow(Id(1)))
@@ -165,12 +168,20 @@ class EngineHandler : Handler() {
 
     override fun onStop() {
         systems.forEach(System::stop)
+        autosave()
+    }
+
+    private fun autosave() {
+        if (isGameTerminated(mapObject.entities)) {
+            fileSystemDriver.delete(autosaveFile)
+        } else {
+            fileSystemDriver.openOutput(autosaveFile).use { out ->
+                JsonDriver.serialize(out, mapObject)
+            }
+        }
     }
 
     override fun onRelease() {
-        fileSystemDriver.openFileOutput(autosaveFile).use { out ->
-            JsonDriver.serialize(out, mapObject)
-        }
         mapObject.entities.clear()
     }
 

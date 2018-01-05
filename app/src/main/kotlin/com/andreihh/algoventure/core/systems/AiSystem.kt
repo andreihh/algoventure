@@ -18,7 +18,6 @@ package com.andreihh.algoventure.core.systems
 
 import com.andreihh.algostorm.core.ecs.EntityGroup
 import com.andreihh.algostorm.core.ecs.EntityRef
-import com.andreihh.algostorm.core.ecs.EntityRef.Id
 import com.andreihh.algostorm.core.event.Subscribe
 import com.andreihh.algostorm.systems.EventSystem
 import com.andreihh.algostorm.systems.physics2d.PathFindingSystem.FindPath
@@ -43,9 +42,9 @@ class AiSystem : EventSystem() {
         }
 
     private fun EntityRef.getCloserToPlayer(): Action {
-        val (dx, dy) = entities.getPlayer().position ?: return getRandomAction()
+        val (dx, dy) = entities.getPlayer()?.position
+            ?: return getRandomAction()
         val path = request(FindPath(id, dx, dy, Direction.CARDINAL))
-        println(path)
         path ?: return getRandomAction()
         return if (path.size in 1..9) Move(id, path.first())
         else getRandomAction()

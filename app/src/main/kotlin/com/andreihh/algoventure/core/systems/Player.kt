@@ -22,4 +22,6 @@ import com.andreihh.algostorm.core.ecs.EntityRef
 
 object Player : Component
 
-fun EntityGroup.getPlayer(): EntityRef = single { Player::class in it }
+fun EntityGroup.getPlayer(): EntityRef? = singleOrNull(EntityRef::isPlayer)
+
+private val EntityRef.isPlayer: Boolean get() = contains(Player::class)

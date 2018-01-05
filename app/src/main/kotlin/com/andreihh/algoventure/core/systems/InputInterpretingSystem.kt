@@ -46,7 +46,7 @@ class InputInterpretingSystem : InputSystem() {
 
     @Subscribe
     fun onActionRequest(request: ActionRequest) {
-        val playerId = entities.getPlayer().id
+        val playerId = entities.getPlayer()?.id
         if (request.entityId == playerId) {
             val action = when (nextPlayerInput) {
                 WAIT -> Wait(playerId)

@@ -21,7 +21,7 @@ import com.andreihh.algostorm.core.drivers.io.Resource
 
 object Sounds {
     val gameWon = Resource<AudioStream>("res:///audio/game_won.mp3")
-    val gameOver = Resource<AudioStream>("res:///audio/game_over.mp3")
+    val gameLost = Resource<AudioStream>("res:///audio/game_lost.mp3")
     val gameSoundtrack =
         Resource<AudioStream>("res:///audio/game_soundtrack.mp3")
 }

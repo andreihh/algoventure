@@ -38,4 +38,6 @@
   <string name="torch">Torch</string>
   <string name="knight_statue">Knight statue</string>
   <string name="wizard_statue">Wizard statue</string>
+  <string name="game_over">Game over</string>
+  <string name="game_won">Game won!</string>
 </resources>
