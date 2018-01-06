@@ -74,6 +74,7 @@ class DungeonGenerator(
         backgroundColor = Color("#FF000000")
         tileSet(TileSets.creatures)
         tileSet(TileSets.world)
+        tileSet(TileSets.healthBar)
         sound(Sounds.gameSoundtrack)
         sound(Sounds.gameLost)
         sound(Sounds.gameWon)

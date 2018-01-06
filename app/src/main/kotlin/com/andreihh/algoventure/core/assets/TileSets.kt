@@ -84,4 +84,15 @@ object TileSets {
             frame(tileId = 78, duration = 500)
         }
     }
+
+    val healthBar = tileSet {
+        name = "health-bar"
+        image {
+            source = "res:///graphics/health_bar.png"
+            width = 24
+            height = 24
+        }
+        tileWidth = 24
+        tileHeight = 24
+    }
 }

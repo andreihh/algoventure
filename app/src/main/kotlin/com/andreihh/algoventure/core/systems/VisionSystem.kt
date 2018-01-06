@@ -28,6 +28,7 @@ import com.andreihh.algostorm.systems.physics2d.Position
 import com.andreihh.algostorm.systems.physics2d.geometry2d.Circle
 import com.andreihh.algostorm.systems.physics2d.geometry2d.Point
 import com.andreihh.algostorm.systems.physics2d.position
+import com.andreihh.algoventure.core.systems.ActingSystem.ActionCompleted
 import com.andreihh.algoventure.core.systems.VisionSystem.Opaque
 import com.andreihh.algoventure.core.systems.VisionSystem.SightRange
 
@@ -39,6 +40,11 @@ class VisionSystem : EventSystem() {
     object UpdateFieldOfVision : Event
 
     private val entities by context<EntityGroup>(ENTITY_POOL)
+
+    @Subscribe
+    fun onActionCompleted(event: ActionCompleted) {
+        post(UpdateFieldOfVision)
+    }
 
     @Subscribe
     fun onUpdateFieldOfVision(event: UpdateFieldOfVision) {

@@ -52,10 +52,10 @@ class ActingSystem : EventSystem() {
     @Subscribe
     fun onNewAct(event: NewAct) {
         val actors = entities.filter(EntityRef::isActor)
-        val nextActor = actors.maxBy { it.actor.stamina } ?: return
-        if (nextActor.actor.stamina <= 0) {
+        val nextActor = actors.maxBy(EntityRef::stamina) ?: return
+        if (nextActor.stamina <= 0) {
             for (entity in actors) {
-                entity.actor = entity.actor.copy(stamina = 1)
+                entity.stamina = 1
             }
             post(NewTurn)
         } else {
@@ -75,16 +75,19 @@ class ActingSystem : EventSystem() {
     @Subscribe
     fun onActionCompleted(event: ActionCompleted) {
         val entity = entities[event.action.entityId] ?: return
-        entity.actor = entity.actor.copy(stamina = entity.actor.stamina - 1)
+        entity.stamina = entity.stamina - 1
         post(NewAct)
     }
 }
 
 val EntityRef.isActor: Boolean get() = contains(Actor::class)
 
-var EntityRef.actor: Actor
+val EntityRef.actor: Actor
     get() = checkNotNull(get(Actor::class))
-    private set(value) {
-        set(value)
+
+private var EntityRef.stamina: Int
+    get() = checkNotNull(get(Actor::class)).stamina
+    set(value) {
+        set(checkNotNull(get(Actor::class)).copy(stamina = value))
     }
 

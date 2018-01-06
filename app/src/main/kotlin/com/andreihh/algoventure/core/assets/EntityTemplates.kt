@@ -25,9 +25,11 @@ import com.andreihh.algoventure.core.systems.ActingSystem.Actor
 import com.andreihh.algoventure.core.systems.DamageSystem.Health
 import com.andreihh.algoventure.core.systems.DoorSystem.Door
 import com.andreihh.algoventure.core.systems.FacingSystem.Facing
+import com.andreihh.algoventure.core.systems.HealthBarSystem.HealthBar
 import com.andreihh.algoventure.core.systems.Player
 import com.andreihh.algoventure.core.systems.VisionSystem.Opaque
 import com.andreihh.algoventure.core.systems.VisionSystem.SightRange
+import kotlin.math.roundToInt
 
 object EntityTemplates {
     fun knight(x: Int, y: Int) = entityTemplate {
@@ -48,6 +50,7 @@ object EntityTemplates {
         +Actor(stamina = 0, damage = 25)
         +Player
         +SightRange(range = 8)
+        +Health(maxHealth = 300, health = 300)
     }
 
     fun zombie(x: Int, y: Int, headless: Boolean = false) = entityTemplate {
@@ -198,5 +201,16 @@ object EntityTemplates {
         +Door(openGid, closedGid, isOpen)
         +Sprite(width = 24, height = 24, z = 1, priority = 2, gid = gid)
         +Position(x, y)
+    }
+
+    fun healthBar(x: Int, y: Int, percent: Float) = entityTemplate {
+        +Sprite(
+            width = maxOf(1, (percent * 24).roundToInt()), height = 4,
+            z = 1, priority = 2,
+            gid = 185,
+            offsetY = 20
+        )
+        +Position(x, y)
+        +HealthBar
     }
 }

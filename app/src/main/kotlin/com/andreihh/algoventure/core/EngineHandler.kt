@@ -60,6 +60,8 @@ import com.andreihh.algoventure.core.systems.DoorSystem
 import com.andreihh.algoventure.core.systems.FacingSystem
 import com.andreihh.algoventure.core.systems.GameTerminationSystem
 import com.andreihh.algoventure.core.systems.GameTerminationSystem.Companion.UI_DRIVER
+import com.andreihh.algoventure.core.systems.HealthBarSystem
+import com.andreihh.algoventure.core.systems.HealthBarSystem.UpdateHealthBars
 import com.andreihh.algoventure.core.systems.InputInterpretingSystem
 import com.andreihh.algoventure.core.systems.MovementSystem
 import com.andreihh.algoventure.core.systems.VisionSystem
@@ -94,6 +96,7 @@ class EngineHandler : Handler() {
         DoorSystem(),
         DamageSystem(),
         AttackSystem(),
+        HealthBarSystem(),
         VisionSystem(),
         GameTerminationSystem()
     )
@@ -132,6 +135,8 @@ class EngineHandler : Handler() {
         systems.forEach { it.initialize(context) }
         eventBus.post(Follow(Id(1)))
         eventBus.post(PlayMusic(music = Sounds.gameSoundtrack, loop = true))
+        eventBus.post(UpdateHealthBars)
+        eventBus.post(UpdateFieldOfVision)
     }
 
     override fun onStart() {
@@ -140,7 +145,6 @@ class EngineHandler : Handler() {
 
     private fun render() {
         eventBus.post(UpdateCamera)
-        eventBus.post(UpdateFieldOfVision)
         eventBus.publishPosts()
         if (graphicsDriver.isCanvasReady) {
             graphicsDriver.lockCanvas()
